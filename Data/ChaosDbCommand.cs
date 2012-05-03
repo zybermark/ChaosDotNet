@@ -6,10 +6,34 @@ namespace ChaosDotNet.Data
 {
    public class ChaosDbCommand : DbCommand, ICloneable, IDisposable
    {
-      protected DbCommand _cmd;
-      protected DbConnection _conn;
-      protected DbTransaction _tran;
+      private DbCommand _cmd;
+
+      protected DbCommand _Cmd
+      {
+         get { return _cmd; }
+         set { _cmd = value; }
+      }
+      private DbConnection _conn;
+
+      protected DbConnection _Conn
+      {
+         get { return _conn; }
+         set { _conn = value; }
+      }
+      private DbTransaction _tran;
+
+      protected DbTransaction _Tran
+      {
+         get { return _tran; }
+         set { _tran = value; }
+      }
       Func<bool> _doInjectFault;
+
+      protected Func<bool> _DoInjectFault
+      {
+         get { return _doInjectFault; }
+         set { _doInjectFault = value; }
+      }
 
       public ChaosDbCommand(DbCommand cmd, DbConnection conn, Func<bool> doInjectFault)
       {

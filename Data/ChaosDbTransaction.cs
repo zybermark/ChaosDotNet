@@ -7,8 +7,26 @@ namespace ChaosDotNet.Data
    public class ChaosDbTransaction : DbTransaction, IDisposable
    {
       private DbConnection _conn;
+
+      protected DbConnection _Conn
+      {
+         get { return _conn; }
+         set { _conn = value; }
+      }
       private DbTransaction _tran;
+
+      protected DbTransaction _Tran
+      {
+         get { return _tran; }
+         set { _tran = value; }
+      }
       private Func<bool> _doInjectFault;
+
+      protected Func<bool> _DoInjectFault
+      {
+         get { return _doInjectFault; }
+         set { _doInjectFault = value; }
+      }
 
       public ChaosDbTransaction(DbTransaction transaction, DbConnection connection, Func<bool> doInjectFault)
       {

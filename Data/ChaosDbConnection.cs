@@ -7,8 +7,20 @@ namespace ChaosDotNet.Data
 {
    public class ChaosDbConnection : DbConnection, IDisposable, ICloneable
    {
-      protected DbConnection _conn;
+      private DbConnection _conn;
+
+      protected DbConnection _Conn
+      {
+         get { return _conn; }
+         set { _conn = value; }
+      }
       Func<bool> _doInjectFault;
+
+      protected Func<bool> _DoInjectFault
+      {
+         get { return _doInjectFault; }
+         set { _doInjectFault = value; }
+      }
       /// <summary>
       /// The wrapped database connection 
       /// </summary>
@@ -17,10 +29,11 @@ namespace ChaosDotNet.Data
          get { return _conn; }
       }
 
-      public ChaosDbConnection(DbConnection connection) : this(connection,  ChaosHelper.DefaultDoInjectFault)
-      {}
+      protected ChaosDbConnection(DbConnection connection)
+         : this(connection, ChaosHelper.DefaultDoInjectFault)
+      { }
 
-      public ChaosDbConnection(DbConnection connection, Func<bool> doInjectFaultAction)
+      protected ChaosDbConnection(DbConnection connection, Func<bool> doInjectFaultAction)
       {
          Debug.Assert(connection != null);
          if (connection == null) throw new ArgumentNullException("connection");
@@ -28,11 +41,37 @@ namespace ChaosDotNet.Data
          if (doInjectFaultAction == null) throw new ArgumentNullException("doInjectFaultAction");
 
          _doInjectFault = doInjectFaultAction;
-         
+
          _conn = connection;
          _conn.StateChange += StateChangeHandler;
       }
 
+      /// <summary>
+      /// Factory method
+      /// </summary>
+      /// <param name="connection"></param>
+      /// <param name="doInjectFaultAction"></param>
+      /// <returns></returns>
+      public static ChaosDbConnection Create(DbConnection connection, Func<bool> doInjectFaultAction = null)
+      {
+         ChaosDbConnection result = null;
+         if (connection != null)
+         {
+            var connType = connection.GetType();
+
+            if (connType == typeof(System.Data.SqlClient.SqlConnection))
+            {
+               result = new Sql.SqlChaosDbConnection(connection, doInjectFaultAction ?? ChaosHelper.DefaultDoInjectFault);
+            }
+            else
+            {
+               // default 
+               result = new ChaosDbConnection(connection, doInjectFaultAction ?? ChaosHelper.DefaultDoInjectFault);
+            }
+
+         }
+         return result;
+      }
 
 #pragma warning disable 1591 // xml doc comments warnings
 
@@ -80,7 +119,7 @@ namespace ChaosDotNet.Data
 
       public override void Close()
       {
-         ChaosHelper.DoChaos(_doInjectFault, new Action[] { ChaosDbException.Throw, () => { throw new ChaosDbException(); } }); 
+         ChaosHelper.DoChaos(_doInjectFault, new Action[] { ChaosDbException.Throw, () => { throw new ChaosDbException(); } });
          _conn.Close();
       }
 
@@ -106,7 +145,7 @@ namespace ChaosDotNet.Data
 
       public override void Open()
       {
-         ChaosHelper.DoChaos(_doInjectFault, new Action[] {ChaosDbException.Throw, ()=>{throw new ChaosDbException();}});
+         ChaosHelper.DoChaos(_doInjectFault, new Action[] { ChaosDbException.Throw, () => { throw new ChaosDbException(); } });
          _conn.Open();
       }
 

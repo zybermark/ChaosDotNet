@@ -4,7 +4,7 @@ A library for unleashing the chaos monkey on your .Net code.
 
 Basic usage for the ChaosDbConnection:
 Wrap your database connection in a ChaosDbConnection like so:
-var conn = new ChaosDbConnection(conn);
+var conn = ChaosDbConnection.Create(conn);
 
 Full example:
    private static DbConnection _GetDbConnectionByName(string connectionStringName)
@@ -22,9 +22,10 @@ Full example:
          DbConnection tmpConnection = provider.CreateConnection();
          tmpConnection.ConnectionString = connectionStringSettings.ConnectionString;
 
-         // wrap the connection in a chaos connection... release the Kraken^H^H^H^H^H^Hmonkeys...
-         tmpConnection = new ChaosDbConnection(tmpConnection);
-
+#if DEBUG
+         // wrap the connection in a chaos connection... release the monkeys...
+         tmpConnection = ChaosDbConnection.Create(tmpConnection);
+#endif
          // wrap the connection with a profiling connection
          connection = new MvcMiniProfiler.Data.ProfiledDbConnection(tmpConnection, MiniProfiler.Current);
       }

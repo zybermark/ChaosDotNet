@@ -23,6 +23,7 @@ namespace ChaosDotNet
       public static bool DefaultDoInjectFault()
       {
          return _rnd.Next(100) < 25; // 25% chance of fail
+         //return _rnd.Next(100) < 5; // 5% chance of fail
       }
    }
 }
